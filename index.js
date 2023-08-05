@@ -49,7 +49,7 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
     let user = await User.findOne({ _id: req.params._id });
 
     if (!user) {
-      res.json({ error: "id not known" });
+      res.json({ error: "id unknown" });
       return;
     }
 
@@ -68,8 +68,20 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
 
 app.get('/api/users/:_id/logs', async (req, res) => {
   try {
+    let user = await User.findOne({ _id: req.params._id });
+
+    if (!user) {
+      res.json({ error: "id unknown" });
+      return;
+    }
+
     let exercises = await Exercise.find({ userId: req.params._id });
-    res.json(exercises);
+    res.json({
+      username: user.username,
+      count: exercises.length,
+      _id: user._id,
+      log: exercises
+    });
   } catch (err) {
     console.log(err);
   }
