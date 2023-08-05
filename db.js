@@ -20,6 +20,7 @@ async function saveNewUser(username) {
 }
 
 const exerciseSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
   description: { type: String, required: true },
   duration: { type: Number, required: true },
   date: { type: String, required: true }
@@ -27,13 +28,14 @@ const exerciseSchema = new mongoose.Schema({
 
 const Exercise = mongoose.model('Exercise', exerciseSchema);
 
-async function saveNewExercise(description, duration, dateStr = null) {
+async function saveNewExercise(userId, description, duration, dateStr = null) {
   try {
     let date = new Date();
     if (dateStr) {
       date = new Date(dateStr)
     }
     const newExercise = new Exercise({
+      userId: userId,
       description: description,
       duration: duration,
       date: date.toDateString()
