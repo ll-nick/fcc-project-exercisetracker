@@ -3,7 +3,7 @@ const cors = require('cors')
 const express = require('express')
 require('dotenv').config()
 
-const { User, saveNewUser } = require('./db');
+const { User, Exercise, saveNewUser, saveNewExercise } = require('./db');
 
 const app = express()
 
@@ -16,8 +16,16 @@ app.get('/', (req, res) => {
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// ====== USERS =======
+
 app.post('/api/users', async (req, res) => {
   try {
+    let userExists = await User.findOne({ username: req.body.username });
+    if (userExists) {
+      res.json({ error: "username already taken" });
+      return;
+    }
+
     let newUser = await saveNewUser(req.body.username);
     res.json(newUser);
   } catch (err) {
@@ -35,6 +43,29 @@ app.get('/api/users', async (req, res) => {
   }
 })
 
+// ====== EXERCISES =======
+
+app.post('/api/users/:_id/exercises', async (req, res) => {
+  try {
+    let user = await User.findOne({ _id: req.params._id });
+
+    if (!user) {
+      res.json({ error: "id not known" });
+      return;
+    }
+
+    let newExercise = await saveNewExercise(req.body.description, req.body.duration, req.body.date);
+    res.json({
+      username: user.username,
+      description: newExercise.description,
+      duration: newExercise.duration,
+      date: newExercise.date,
+      _id: user._id
+    });
+  } catch (err) {
+    console.log(err);
+  }
+})
 
 
 const listener = app.listen(process.env.PORT || 3000, () => {
