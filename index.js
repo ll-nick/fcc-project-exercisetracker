@@ -75,7 +75,31 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       return;
     }
 
-    let exercises = await Exercise.find({ userId: req.params._id });
+    let exercises = await Exercise
+      .find({
+        userId: req.params._id,
+      })
+      .sort({ date: 1 })
+
+    if (req.query.from) {
+      let from = new Date(req.query.from);
+      exercises = exercises.filter(exercise => {
+        date = new Date(exercise.date)
+        return date >= from;
+      })
+    }
+    if (req.query.to) {
+      let to = new Date(req.query.to);
+      exercises = exercises.filter(exercise => {
+        date = new Date(exercise.date)
+        return date <= to;
+      })
+    }
+    if (req.query.limit) {
+      let limit = Number(req.query.limit);
+      exercises = exercises.slice(0, limit)
+    }
+
     res.json({
       username: user.username,
       count: exercises.length,
